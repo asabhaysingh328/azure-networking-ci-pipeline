@@ -12,7 +12,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/<your-username>/azure-networking-ci-pipeline.git'
+                    url: 'https://github.com/asabhaysingh328/azure-networking-ci-pipeline.git'
             }
         }
 
