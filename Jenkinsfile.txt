@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    environment {
+        ARM_CLIENT_ID       = credentials('azure-app-id')
+        ARM_CLIENT_SECRET   = credentials('azure-password')
+        ARM_TENANT_ID       = credentials('azure-tenant-id')
+        ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/<your-username>/azure-networking-ci-pipeline.git'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform init -backend-config=backend.tfvars'
+                }
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform validate'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform plan -out=tfplan'
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Azure networking infrastructure deployed successfully!"
+        }
+        failure {
+            echo "❌ Deployment failed. Check logs."
+        }
+    }
+}
